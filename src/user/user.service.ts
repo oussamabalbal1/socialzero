@@ -47,7 +47,9 @@ export class UserService {
         if (user_if_exist){
             throw new HttpException(`${user.fullname} already exist`,HttpStatus.FOUND)
         }
-        const user_data = this.userrepository.create(user)
+        const createdAt = new Date()
+        const updatedAt = new Date()
+        const user_data = this.userrepository.create({...user,createdAt,updatedAt})
         return this,this.userrepository.save(user_data);
     }
 
@@ -61,17 +63,19 @@ export class UserService {
             throw new HttpException(`User not found`,HttpStatus.NOT_FOUND)
         }
         //create an object of a user with his id
-        const user_to_update:User={id,...user}
+        const user_to_update={id,...user}
         //if old information of that user = new information client want to update throw and exception
         //else update the user information
         if(user_if_exist.email==user_to_update.email && user_if_exist.fullname==user_to_update.fullname){
             throw new HttpException(`User Already updated`,HttpStatus.NOT_ACCEPTABLE)
         }
-        const user_data=this.userrepository.update(id,user)
+        const createdAt = user_if_exist.createdAt
+        const updatedAt = new Date()
+        const user_data=this.userrepository.update(id,{...user,createdAt,updatedAt})
     
         const data ={
             oldUserData:user_if_exist,
-            newUserData:{id,...user}
+            newUserData:{id,...user,createdAt,updatedAt}
         }
         return data
 
