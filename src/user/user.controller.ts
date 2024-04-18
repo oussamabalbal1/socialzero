@@ -1,14 +1,15 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query ,} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards ,} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDTO } from './DTO/createUserDTO';
 import { GetQueryDTO } from './DTO/getQueryDTO';
 import { UpdateUserDTO } from './DTO/updateUserDTO';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('user')
 export class UserController {
     constructor (private readonly userservice:UserService){};
-
-
+    //user should have token on his header so he can access to this route
+    @UseGuards(AuthGuard)
     @Get()  
     getUsers(){
         return this.userservice.getAllUsers();
@@ -19,6 +20,7 @@ export class UserController {
 
     //Get range of users based on query provided by client- input:query object output:Array of Users
     //example : localhost:3000/user/range?start=2&end=4
+    
     @Get('range')
     //using GetQueryDTO to validate inpute data sent by client
     getRangeOfUsers(@Query() query_data:GetQueryDTO){
