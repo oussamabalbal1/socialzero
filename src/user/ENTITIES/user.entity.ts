@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Post } from 'src/post/ENTITIES/post.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity()
 export class User {
@@ -21,4 +22,12 @@ export class User {
 
   @Column()
   updatedAt: Date;
+
+    //Consider two entities: User and Post. If User can have multiple Postes entities associated with it (one-to-many relationship)
+    //(Many side - one-to-many)
+    //cascade:true that means when i delete the user with delete his postes too
+    @OneToMany(() => Post, (post) => post.user,{cascade:true})
+    postes: Post[];
+
+    
 }

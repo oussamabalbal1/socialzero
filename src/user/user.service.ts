@@ -31,7 +31,10 @@ export class UserService {
 
     //Get all users - input:nothing output:Array of Users
     async getAllUsers():Promise<User[]>{
-        return await this.userrepository.find();
+        return await this.userrepository.find(
+            //use relations so will return another -postes- property with user object
+            {relations:{postes:true}
+        });
     }
 
     
@@ -50,11 +53,12 @@ export class UserService {
         }
         const createdAt = new Date()
         const updatedAt = new Date()
+        //storing password on hashing format instead of plain text
         const salt = await bcrypt.genSalt()
         const hashedPassword = await bcrypt.hash(user.password,salt)
-        //storing password on hashing format instead of plain text
-        const user_data = this.userrepository.create({...user,password:hashedPassword,createdAt,updatedAt})
-        return this,this.userrepository.save(user_data);
+
+        const user_data = this.userrepository.create({...user,password:hashedPassword,createdAt,updatedAt,postes:[]})
+        return this.userrepository.save(user_data);
     }
 
     //Update a user infromation based in his id - input:id of user you want to update + User(without id) output:old User + new User (with id)

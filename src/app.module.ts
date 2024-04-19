@@ -5,6 +5,7 @@ import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { PostModule } from './post/post.module';
 
 
 @Module({
@@ -29,6 +30,7 @@ import { JwtModule } from '@nestjs/jwt';
     signOptions: { expiresIn: '1h' },
   }),
     AuthModule,
+    PostModule,
   ],
 })
 export class AppModule {}
