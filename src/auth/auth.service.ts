@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/ENTITIES/user.entity';
 import { Repository } from 'typeorm';
 import { sign } from 'jsonwebtoken';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +24,9 @@ export class AuthService {
             throw new HttpException(`Invalide credentials`,HttpStatus.NOT_FOUND)
         }
         //check if the possword that provided by client is matching the password that stored in database
-        if(!(usersignindata.password===user_if_exist.password)){
+        //we have to use bcrypt for that because we hashed the password
+        const passwordsMatch:boolean=await bcrypt.compare(usersignindata.password,user_if_exist.password)
+        if(!passwordsMatch){
             throw new HttpException(`Password invalide`,HttpStatus.NOT_FOUND)
         }
 
