@@ -4,6 +4,7 @@ import { User } from './ENTITIES/user.entity';
 import { Between, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateUserDTO } from './DTO/updateUserDTO';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -49,7 +50,10 @@ export class UserService {
         }
         const createdAt = new Date()
         const updatedAt = new Date()
-        const user_data = this.userrepository.create({...user,createdAt,updatedAt})
+        const salt = await bcrypt.genSalt()
+        const hashedPassword = await bcrypt.hash(user.password,salt)
+        //storing password on hashing format instead of plain text
+        const user_data = this.userrepository.create({...user,password:hashedPassword,createdAt,updatedAt})
         return this,this.userrepository.save(user_data);
     }
 
