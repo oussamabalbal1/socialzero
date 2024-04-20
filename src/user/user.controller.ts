@@ -21,18 +21,21 @@ export class UserController {
     //Get range of users based on query provided by client- input:query object output:Array of Users
     //example : localhost:3000/user/range?start=2&end=4
     
-    @Get('range')
-    //using GetQueryDTO to validate inpute data sent by client
-    getRangeOfUsers(@Query() query_data:GetQueryDTO){
-        //query_data will be an object has start and end
-        const {start,end}=query_data
-        return this.userservice.getRangeOfUsers(start,end)
+
+    //to implement this function id should be a number not uuid
+    // @Get('range')
+    // //using GetQueryDTO to validate inpute data sent by client
+    // getRangeOfUsers(@Query() query_data:GetQueryDTO){
+    //     //query_data will be an object has start and end
+    //     const {start,end}=query_data
+    //     return this.userservice.getRangeOfUsers(start,end)
  
-    }
+    // }
 
     @Get(':id')
     //using ParseIntPipe pipe to transform input data from string to number
-    getOneUserById(@Param('id',ParseIntPipe) id: number){
+    //we do not use pipes due to id is uuid
+    getOneUserById(@Param('id') id: string){
         return this.userservice.getOneUser(id)
     }
 
@@ -45,15 +48,13 @@ export class UserController {
 
 
     @Patch(':id')
-    //using ParseIntPipe pipe to transform input data from string to number
     //using UpdateUserDTO to validate inpute data sent by client
-    updateUserById(@Param('id',ParseIntPipe) id:number,@Body() user:UpdateUserDTO){
+    updateUserById(@Param('id') id:string,@Body() user:UpdateUserDTO){
         return this.userservice.updateUserById(id,user)
     }
 
     @Delete(':id')
-    //using ParseIntPipe pipe to transform input data from string to number
-    deleteUserById(@Param('id',ParseIntPipe)id:number){
+    deleteUserById(@Param('id') id:string){
         return this.userservice.deleteUserById(id)
     }
 

@@ -6,7 +6,7 @@ export class User {
   //instead of using id as number like:1,2,3...
   //'uuid' will make IDs unique
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column()
   fullname: string;

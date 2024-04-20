@@ -12,22 +12,28 @@ export class UserService {
 
     //Get one user By id - input:ID output:User
     //example : http://localhost:3000/user/4
-    async getOneUser(id:number){
-        const user_data= await this.userrepository.findOneBy({id})
-        return user_data;
+    async getOneUser(id:string){
+        try {
+            const user_data= await this.userrepository.findOneBy({id})
+            return user_data;
+        } catch (error) {
+            throw new HttpException(`Invalide ID`,HttpStatus.NOT_FOUND)
+        }
+    
     }
 
     //Get range of users based on query provided by client- input:query object output:Array of Users
     //example : localhost:3000/user?query_data={us=13}
-    async getRangeOfUsers(start:number,end:number):Promise<User[]>{
-        //find range of users where id is between start and end 
-        const user_data=await this.userrepository.find({
-            where:{
-                id: Between(start, end)
-            }})
-        return user_data
+    //id should be number not uiid to implement this function
+    // async getRangeOfUsers(start:number,end:number):Promise<User[]>{
+    //     //find range of users where id is between start and end 
+    //     const user_data=await this.userrepository.find({
+    //         where:{
+    //             id: Between(start, end)
+    //         }})
+    //     return user_data
 
-    }
+    // }
 
     //Get all users - input:nothing output:Array of Users
     async getAllUsers():Promise<User[]>{
@@ -63,7 +69,7 @@ export class UserService {
 
     //Update a user infromation based in his id - input:id of user you want to update + User(without id) output:old User + new User (with id)
     //hash password before storing it in database
-    async updateUserById(id:number,user:UpdateUserDTO){
+    async updateUserById(id:string,user:UpdateUserDTO){
         //first we need to find user that match with the ID that provide by client
         const user_if_exist= await this.userrepository.findOneBy({id})
         //if not find user by id throw and exception
@@ -88,7 +94,7 @@ export class UserService {
         return data
 
     }
-    async deleteUserById(id:number){
+    async deleteUserById(id:string){
         //first check if the id provided by client match any user
         const user_if_exist= await this.userrepository.findOneBy({id})
         //if not exist thrwo an exception
