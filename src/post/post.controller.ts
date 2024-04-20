@@ -8,33 +8,28 @@ import { UserService } from 'src/user/user.service';
 export class PostController {
 
     constructor (private readonly postservice:PostService,private readonly userservice:UserService){};
-    //user should have token on his headers so he can access to this route
-    //using @Req() decorator to extract token from header (better for security) or you can provide id of users as a param
-    @Post("create/:id")  
-    async createPost(@Body() post:CreatePostDTO,@Param('id') id: string){
-        //we should check the ID if it related to any user
-        const user = await this.userservice.getOneUser(id)
-
-        console.log(user)
-        //extractiing tocken from headers
-        // const token:string=req.headers['authorization'].replace('Bearer ', '')
-         // should write this -@Req() req :Request- inside createPost as an argument 
-   
+    //using middleware to extract id from headers by decoding it and pass it back inside req
+    @Post("create")  
+    async createPost(@Body() post:CreatePostDTO,@Req() req:Request){
+        const id:string=req["idFromToken"]  
         return this.postservice.createOnePost(id,post);
     }
+
 
     //get all post
     @Get()
     getAllPosts(){
         return this.postservice.listAllPostes()
         }
+    //listing one post by post id
     @Get(":id")
     getPostById(@Param('id') id: string){
         return this.postservice.listOnePostById(id)
-        }
+    }
 
-    @Get('user/:id')
-    getPostesByUserId(@Param('id') id: string){
+    @Get('user/posts')
+    getPostesByUserId(@Req() req:Request){
+        const id:string=req["idFromToken"] 
         return this.postservice.listPostsByUserId(id)
     }
 

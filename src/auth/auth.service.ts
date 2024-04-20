@@ -35,7 +35,7 @@ export class AuthService {
         //i need that information inside the tocken to check if user is authonticated
         const data:any={
             "email":user_if_exist.email,
-            "fullname":user_if_exist.fullname,
+            "id":user_if_exist.id,
         }
         const token=sign(data,"secrete")
         // const { password, ...result } = user;

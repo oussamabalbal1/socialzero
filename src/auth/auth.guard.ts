@@ -30,6 +30,7 @@ export class AuthGuard implements CanActivate {
       throw new HttpException(`Token incorrect`,HttpStatus.UNAUTHORIZED)
     }
   }
+  
 
 
 
