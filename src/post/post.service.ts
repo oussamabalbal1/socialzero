@@ -1,10 +1,9 @@
 import { HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Post } from './ENTITIES/post.entity';
+import { Location, Post } from './ENTITIES/post.entity';
 import { Repository } from 'typeorm';
 import { CreatePostDTO } from './DTO/createPostDTO';
 import { User } from 'src/user/ENTITIES/user.entity';
-import { PostGetTokenCustomDeco } from 'src/DECORATORS/post.get-token-custom-deco.decorator';
 import { UUIDDTO } from 'src/user/DTO/IdDTO';
 
 @Injectable()
@@ -31,13 +30,15 @@ export class PostService {
         const createdAt = new Date()
         const updatedAt = new Date()
         //// to tssociate the post with the user, we should add property user
-        const user_data = this.postrepository.create({...post,createdAt,updatedAt,userId})
-        return this.postrepository.save(user_data);
+        const post_data = this.postrepository.create({...post,createdAt,updatedAt,userId,source:Location.Profile})
+        console.log(post_data)
+        return this.postrepository.save(post_data);
     }
     //list all postes
     async listAllPostes(){
         return await this.postrepository.find({relations:{user:true}})
     }
+
 
     async listOnePostById(params:UUIDDTO){
         

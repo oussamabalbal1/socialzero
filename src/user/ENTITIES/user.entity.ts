@@ -1,3 +1,4 @@
+import { Group } from 'src/group/ENTITIES/group.entity';
 import { Post } from 'src/post/ENTITIES/post.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
@@ -26,8 +27,13 @@ export class User {
     //Consider two entities: User and Post. If User can have multiple Postes entities associated with it (one-to-many relationship)
     //(Many side - one-to-many)
     //cascade:true that means when i delete the user with delete his postes too
+
+    //user can have many posts
     @OneToMany(() => Post, (post) => post.user,{cascade:true})
     postes: Post[];
+    //user can own many groups
+    @OneToMany(() => Group, (group) => group.owner,{cascade:true})
+    groups: Group[];
 
     
 }

@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Req } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDTO } from './DTO/createPostDTO';
-import { PostGetTokenCustomDeco } from 'src/DECORATORS/post.get-token-custom-deco.decorator';
 import { UserService } from 'src/user/user.service';
 import { UUIDDTO } from 'src/user/DTO/IdDTO';
 
@@ -12,8 +11,8 @@ export class PostController {
     //using middleware to extract id from headers by decoding it and pass it back inside req
     @Post("create")  
     async createPost(@Body() post:CreatePostDTO,@Req() req:Request){
-        const id:string=req["idFromToken"]  
-        return this.postservice.createOnePost(id,post);
+        const userId:string=req["idFromToken"]  
+        return this.postservice.createOnePost(userId,post);
     }
 
 

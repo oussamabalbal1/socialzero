@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PostModule } from './post/post.module';
+import { GroupModule } from './group/group.module';
 
 
 @Module({
@@ -31,6 +32,7 @@ import { PostModule } from './post/post.module';
   }),
     AuthModule,
     PostModule,
+    GroupModule,
   ],
 })
 export class AppModule {}
