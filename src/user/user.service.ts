@@ -5,6 +5,7 @@ import { Between, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateUserDTO } from './DTO/updateUserDTO';
 import * as bcrypt from 'bcrypt';
+import { UUIDDTO } from './DTO/IdDTO';
 
 @Injectable()
 export class UserService {
@@ -12,13 +13,14 @@ export class UserService {
 
     //Get one user By id - input:ID output:User
     //example : http://localhost:3000/user/4
-    async getOneUser(id:string){
-        try {
-            const user_data= await this.userrepository.findOneBy({id})
-            return user_data;
-        } catch (error) {
-            throw new HttpException(`Invalide ID`,HttpStatus.NOT_FOUND)
+    async getOneUser(params:UUIDDTO): Promise<User>{
+        const userId:string=params.uuid
+        const user_data= await this.userrepository.findOneBy({id:userId})
+        console.log(user_data)
+        if(!user_data){
+            throw new HttpException(`No user with this ID`,HttpStatus.NOT_FOUND)
         }
+        return user_data;
     
     }
 
@@ -69,15 +71,16 @@ export class UserService {
 
     //Update a user infromation based in his id - input:id of user you want to update + User(without id) output:old User + new User (with id)
     //hash password before storing it in database
-    async updateUserById(id:string,user:UpdateUserDTO){
+    async updateUserById(params:UUIDDTO,user:UpdateUserDTO){
+        const userId:string=params.uuid
         //first we need to find user that match with the ID that provide by client
-        const user_if_exist= await this.userrepository.findOneBy({id})
+        const user_if_exist= await this.userrepository.findOneBy({id:userId})
         //if not find user by id throw and exception
         if(!user_if_exist){
             throw new HttpException(`User not found`,HttpStatus.NOT_FOUND)
         }
         //create an object of a user with his id
-        const user_to_update={id,...user}
+        const user_to_update={userId,...user}
         //if old information of that user = new information client want to update throw and exception
         //else update the user information
         if(user_if_exist.email==user_to_update.email && user_if_exist.fullname==user_to_update.fullname){
@@ -85,24 +88,25 @@ export class UserService {
         }
         const createdAt = user_if_exist.createdAt
         const updatedAt = new Date()
-        const user_data=this.userrepository.update(id,{...user,createdAt,updatedAt})
+        const user_data=this.userrepository.update(userId,{...user,createdAt,updatedAt})
     
         const data ={
             oldUserData:user_if_exist,
-            newUserData:{id,...user,createdAt,updatedAt}
+            newUserData:{userId,...user,createdAt,updatedAt}
         }
         return data
 
     }
-    async deleteUserById(id:string){
+    async deleteUserById(params:UUIDDTO){
+        const userId:string=params.uuid
         //first check if the id provided by client match any user
-        const user_if_exist= await this.userrepository.findOneBy({id})
+        const user_if_exist= await this.userrepository.findOneBy({id:userId})
         //if not exist thrwo an exception
         if(!user_if_exist){
             throw new HttpException(`User not found`,HttpStatus.NOT_FOUND)
         }
         //else delete the user information
-        return await this.userrepository.delete(id)
+        return await this.userrepository.delete({id:userId})
 
 
     }

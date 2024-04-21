@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreatePostDTO } from './DTO/createPostDTO';
 import { User } from 'src/user/ENTITIES/user.entity';
 import { PostGetTokenCustomDeco } from 'src/DECORATORS/post.get-token-custom-deco.decorator';
+import { UUIDDTO } from 'src/user/DTO/IdDTO';
 
 @Injectable()
 export class PostService {
@@ -38,13 +39,14 @@ export class PostService {
         return await this.postrepository.find({relations:{user:true}})
     }
 
-    async listOnePostById(id:string){
-        try {
-            const user_data= await this.postrepository.findOneBy({id})
+    async listOnePostById(params:UUIDDTO){
+        
+            const user_data= await this.postrepository.findOneBy({id:params.uuid})
+            if (!user_data){
+                throw new HttpException(`Invalid id. Please provide a valid id.`,HttpStatus.NOT_FOUND)
+            }
             return user_data;
-        } catch (error) {
-            throw new HttpException(`Invalide ID`,HttpStatus.NOT_FOUND)
-        }
+     
     }
 
     async listPostsByUserId(id:string){
@@ -55,5 +57,16 @@ export class PostService {
         } catch (error) {
             throw new HttpException(`Invalide ID`,HttpStatus.NOT_FOUND)
         }
+    }
+
+    async deleteOnePostByPostId(params:UUIDDTO):Promise<Post>{
+        const postId:string=params.uuid
+        //fisrt check the post is exist or not 
+        const post:Post=await this.postrepository.findOneBy({id:postId})
+        if(!post){
+            throw new HttpException(`Post not found. Please provide a valid id.`,HttpStatus.NOT_FOUND)
+        }
+        await this.postrepository.delete({id:postId})
+        return post
     }
 }

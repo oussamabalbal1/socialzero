@@ -2,9 +2,9 @@
 
 import { IsUUID, } from "class-validator";
 
-export class IdDTO {
+export class UUIDDTO  {
 
-    @IsUUID(undefined)
-    readonly Id: string
+    @IsUUID('4', { message: 'Invalid UUID format' })
+    readonly uuid: string
 
 }

@@ -9,15 +9,16 @@ import { JwtService } from '@nestjs/jwt';
 export class PostExtractTokenToGetIdMiddleware implements NestMiddleware {
   constructor(private jwtService: JwtService) {}
   use(req: any, res: any, next: () => void) {
+    console.log("inside middleware..")
+    //getting access to token
+    // const token:string=req.headers['authorization'].replace('Bearer ', '')
+    const token = this.extractTokenFromHeader(req);
+    //if there is not token throw error
+    if (!token) {
+      throw new HttpException(`Access token is missing. Please provide an access token.`,HttpStatus.UNAUTHORIZED)
+    }
 
     try {
-      console.log("inside auth middleware..")
-      //getting access to token
-      const token:string=req.headers['authorization'].replace('Bearer ', '')
-      //if there is not token throw error
-      if (!token) {
-        throw new HttpException(`You have not provided a token`,HttpStatus.UNAUTHORIZED)
-      }
       // do not need secrete here to decode the token because you specefied the secret globally inside app module
       //if when we trying to decode token if token was invalid jwt service will throw an error
       const decoded = this.jwtService.verify(token);
@@ -26,9 +27,17 @@ export class PostExtractTokenToGetIdMiddleware implements NestMiddleware {
   
      
     } catch (error) {
-      throw new HttpException(`Token invalide`,HttpStatus.UNAUTHORIZED)
+      throw new HttpException(`Invalid token. Please provide a valid access token.`,HttpStatus.UNAUTHORIZED)
     }
     next();
     
+  }
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const authorizationHeader = request.headers['authorization'];
+    if (typeof authorizationHeader === 'string') {
+      const [type, token] = authorizationHeader.split(' ');
+      return type === 'Bearer' ? token : undefined;
+    }
+    return undefined;
   }
 }

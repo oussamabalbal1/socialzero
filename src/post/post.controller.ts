@@ -1,8 +1,9 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Req } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDTO } from './DTO/createPostDTO';
 import { PostGetTokenCustomDeco } from 'src/DECORATORS/post.get-token-custom-deco.decorator';
 import { UserService } from 'src/user/user.service';
+import { UUIDDTO } from 'src/user/DTO/IdDTO';
 
 @Controller('post')
 export class PostController {
@@ -21,16 +22,21 @@ export class PostController {
     getAllPosts(){
         return this.postservice.listAllPostes()
         }
-    //listing one post by post id
-    @Get(":id")
-    getPostById(@Param('id') id: string){
-        return this.postservice.listOnePostById(id)
+    //listing one post by post UUID
+    @Get(':uuid')
+    getPostById(@Param() params: UUIDDTO){
+        return this.postservice.listOnePostById(params)
     }
 
     @Get('user/posts')
     getPostesByUserId(@Req() req:Request){
         const id:string=req["idFromToken"] 
         return this.postservice.listPostsByUserId(id)
+    }
+
+    @Delete(':uuid')
+    deleteOnePostByPostId(@Param() params: UUIDDTO){
+        return this.postservice.deleteOnePostByPostId(params)
     }
 
 }

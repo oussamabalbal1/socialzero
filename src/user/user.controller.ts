@@ -4,11 +4,14 @@ import { CreateUserDTO } from './DTO/createUserDTO';
 import { GetQueryDTO } from './DTO/getQueryDTO';
 import { UpdateUserDTO } from './DTO/updateUserDTO';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { UUIDDTO } from './DTO/IdDTO';
 
 @Controller('user')
 export class UserController {
     constructor (private readonly userservice:UserService){};
-    //user should have token on his header so he can access to this route
+
+
+    //user should have a valid token on his header so he can access to this route
     @UseGuards(AuthGuard)
     @Get()  
     getUsers(){
@@ -32,30 +35,38 @@ export class UserController {
  
     // }
 
-    @Get(':id')
-    //using ParseIntPipe pipe to transform input data from string to number
-    //we do not use pipes due to id is uuid
-    getOneUserById(@Param('id') id: string){
-        return this.userservice.getOneUser(id)
+    //user must be authenticated
+    //uuid must matching token that mean user get his data only: NOT HANDLED YET
+    @UseGuards(AuthGuard)
+    @Get(':uuid')
+    //we should validate if user is provided a valid uuid or not by DTO
+    getOneUserById(@Param() params: UUIDDTO){
+        return this.userservice.getOneUser(params)
     }
 
-
+    //user must be authenticated
+   
+    
     @Post()
     //using CreateUserDTO to validate inpute data sent by client
     createOneUser(@Body() user:CreateUserDTO){
         return this.userservice.createUser(user)
     }
 
-
-    @Patch(':id')
+    //user must be authenticated
+    //uuid must matching token that mean user can update his data only: NOT HANDLED YET
+    @UseGuards(AuthGuard)
+    @Patch(':uuid')
     //using UpdateUserDTO to validate inpute data sent by client
-    updateUserById(@Param('id') id:string,@Body() user:UpdateUserDTO){
-        return this.userservice.updateUserById(id,user)
+    updateUserById(@Param() params: UUIDDTO,@Body() user:UpdateUserDTO){
+        return this.userservice.updateUserById(params,user)
     }
-
-    @Delete(':id')
-    deleteUserById(@Param('id') id:string){
-        return this.userservice.deleteUserById(id)
+    //user must be authenticated
+    //uuid must matching token that mean user can delete his data only: NOT HANDLED YET
+    @UseGuards(AuthGuard)
+    @Delete(':uuid')
+    deleteUserById(@Param() params: UUIDDTO){
+        return this.userservice.deleteUserById(params)
     }
 
 }
