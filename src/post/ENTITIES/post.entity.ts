@@ -31,15 +31,12 @@ export class Post {
   //instead of refer to the Post like this (description,createdAt,updatedAt,User()) while User() is object
   //we will refer to it like this (description,createdAt,updatedAt,userId) while userId is string
   //both ways are working
-  @Column({name:'userId'})
-  userId:string
+
   //many posts can owned by one user
   @ManyToOne(()=>User,(user)=>user.postes)
   user: User;
 
-  //nullable makes the relationship optional
-  @Column({name:'groupId',nullable: true})
-  groupId:string
+
   //many posts can owned by one group
   @ManyToOne(()=>Group,(group)=>group.postes)
   group: Group;

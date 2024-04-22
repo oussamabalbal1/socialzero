@@ -1,6 +1,6 @@
 import { Group } from 'src/group/ENTITIES/group.entity';
 import { Post } from 'src/post/ENTITIES/post.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 
 @Entity()
 export class User {
@@ -34,6 +34,11 @@ export class User {
     //user can own many groups
     @OneToMany(() => Group, (group) => group.owner,{cascade:true})
     groups: Group[];
+    //each one user can joined to many groups
+    @ManyToMany(() => Group, (group) => group.members,{cascade:true})
+    joinedGroups:Group[]
+
+    
 
     
 }

@@ -27,10 +27,11 @@ export class PostService {
 
         //using method two (you can use both methods in our case)
         //creating new post associated to userId
+        const user:User=await this.userrepository.findOneBy({id:userId})
         const createdAt = new Date()
         const updatedAt = new Date()
         //// to tssociate the post with the user, we should add property user
-        const post_data = this.postrepository.create({...post,createdAt,updatedAt,userId,source:Location.Profile})
+        const post_data = this.postrepository.create({...post,createdAt,updatedAt,user:user,source:Location.Profile})
         console.log(post_data)
         return this.postrepository.save(post_data);
     }
@@ -51,9 +52,9 @@ export class PostService {
     }
 
     async listPostsByUserId(id:string){
-        const userId=id
+        const user:User=await this.userrepository.findOneBy({id:id})
         try {
-            const user_data= await this.postrepository.find({where:{userId}})
+            const user_data= await this.postrepository.find({where:{user:user}})
             return user_data;
         } catch (error) {
             throw new HttpException(`Invalide ID`,HttpStatus.NOT_FOUND)
