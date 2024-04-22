@@ -36,7 +36,7 @@ export class User {
     groups: Group[];
     //each one user can joined to many groups
     @ManyToMany(() => Group, (group) => group.members,{cascade:true})
-    joinedGroups:Group[]
+    memberIn:Group[]
 
     
 

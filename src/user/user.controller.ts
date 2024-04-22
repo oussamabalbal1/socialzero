@@ -2,9 +2,9 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query,
 import { UserService } from './user.service';
 import { CreateUserDTO } from './DTO/createUserDTO';
 import { GetQueryDTO } from './DTO/getQueryDTO';
-import { UpdateUserDTO } from './DTO/updateUserDTO';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { UUIDDTO } from './DTO/IdDTO';
+import { PartialUpdateUserDTO } from './DTO/partialUpdateUserDTO';
 
 @Controller('user')
 export class UserController {
@@ -16,6 +16,11 @@ export class UserController {
     @Get()  
     getUsers(){
         return this.userservice.getAllUsers();
+    }
+
+    @Post()
+    createOneUser(@Body() user:CreateUserDTO){
+        return this.userservice.createUser(user)
     }
 
 
@@ -47,23 +52,18 @@ export class UserController {
     //user must be authenticated
    
     
-    @Post()
-    //using CreateUserDTO to validate inpute data sent by client
-    createOneUser(@Body() user:CreateUserDTO){
-        return this.userservice.createUser(user)
-    }
 
     //user must be authenticated
     //uuid must matching token that mean user can update his data only: NOT HANDLED YET
-    @UseGuards(AuthGuard)
+    // @UseGuards(AuthGuard)
     @Patch(':uuid')
     //using UpdateUserDTO to validate inpute data sent by client
-    updateUserById(@Param() params: UUIDDTO,@Body() user:UpdateUserDTO){
-        return this.userservice.updateUserById(params,user)
+    updateUserById(@Param() params: UUIDDTO,@Body() partialUser:PartialUpdateUserDTO){
+        return this.userservice.updateUserById(params,partialUser)
     }
     //user must be authenticated
     //uuid must matching token that mean user can delete his data only: NOT HANDLED YET
-    @UseGuards(AuthGuard)
+    // @UseGuards(AuthGuard)
     @Delete(':uuid')
     deleteUserById(@Param() params: UUIDDTO){
         return this.userservice.deleteUserById(params)

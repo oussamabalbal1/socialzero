@@ -38,7 +38,7 @@ export class Group {
 
   //group can have many members
   //each one user can joined to many groups
-  @ManyToMany(()=>User,(user)=>user.joinedGroups)
+  @ManyToMany(()=>User,(user)=>user.memberIn)
   @JoinTable({
     name: 'group_user', // Specify the name of the join table
     joinColumn: {

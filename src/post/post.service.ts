@@ -17,15 +17,7 @@ export class PostService {
 
 
     // create one post
-    async createOnePost(userId:string,post:CreatePostDTO){
-
-
-            //method one : fisrt find user, then create new post related to it 
-                //const user = await this.userrepository.findOneBy({email})
-                //const user_data = this.postrepository.create({...post,createdAt,updatedAt,user})
-            //method two : using userId directly (you need to rewrite userId collumn on post entity first)
-
-        //using method two (you can use both methods in our case)
+    async createOnePost(userId:string,post:CreatePostDTO):Promise<Post>{
         //creating new post associated to userId
         const user:User=await this.userrepository.findOneBy({id:userId})
         const createdAt = new Date()
@@ -37,7 +29,7 @@ export class PostService {
     }
     //list all postes
     async listAllPostes(){
-        return await this.postrepository.find({relations:{user:true}})
+        return await this.postrepository.find({relations:{user:true,group:true}})
     }
 
 
