@@ -5,6 +5,8 @@ import { GetQueryDTO } from './DTO/getQueryDTO';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { UUIDDTO } from './DTO/IdDTO';
 import { PartialUpdateUserDTO } from './DTO/partialUpdateUserDTO';
+import { Roles } from 'src/auth/DECORATORS/role/role.decorator';
+import { Role } from 'src/auth/DECORATORS/role/interface';
 
 @Controller('user')
 export class UserController {
@@ -12,6 +14,7 @@ export class UserController {
 
 
     //user should have a valid token on his header so he can access to this route
+    @Roles(Role.User)
     @UseGuards(AuthGuard)
     @Get()  
     getUsers(){

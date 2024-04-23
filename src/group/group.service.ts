@@ -66,4 +66,26 @@ export class GroupService {
 
 
     }
+
+    async deleteUser(groupId:string,userId:string):Promise<Group>{
+        //find group
+        //this will return the entire group information
+        const group:Group= await this.grouprepository.findOne({relations:{members:true},where:{id:groupId}})
+
+        //this will return group with one member that match the userId
+        //i would like to use this to  check the user that i want to delete it exist in the group or not 
+        //if count is greater than 0 (entity found)
+        
+        //before deleting a user from a group we should verify is that user is a member of this group
+        const ifMemberFoundInTheGroup= await this.grouprepository.count({relations:{members:true},where:{members:{id:userId}}})
+        if (ifMemberFoundInTheGroup==0){
+            throw new HttpException(`User is not a member of the group`,HttpStatus.NOT_ACCEPTABLE)
+        }
+
+        //deletin user
+        group.members=group.members.filter((user) => user.id !== userId);
+        
+        return await this.grouprepository.save(group)
+
+    }
 }

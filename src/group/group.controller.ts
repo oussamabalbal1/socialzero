@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Req } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { CreateGroupDTO } from './DTO/createGroupDTO';
 import { UUIDDTO } from 'src/user/DTO/IdDTO';
 import { CreatePostDTO } from 'src/post/DTO/createPostDTO';
+import { constants } from 'buffer';
+import { stringify } from 'querystring';
 
 @Controller('group')
 export class GroupController {
@@ -29,12 +31,22 @@ export class GroupController {
         const groupId:string=params.uuid;
         return this.groupservice.createPost(userId,groupId,post)
     }
+    //this route will add new user to the group(should provide group id in the link )
     @Post(':uuid/user')
     addUser(@Param() params: UUIDDTO,@Req() req:Request){
         const groupId:string=params.uuid;
         const userId:string=req["idFromToken"]
         return this.groupservice.addUser(userId,groupId)
     }
+    //this function will delete an existing user into the group (should provide group id the link)
+    @Delete(':uuid/user')
+        deleteUser(@Param() params:UUIDDTO,@Req() req:Request ){
+            const groupId:string=params.uuid;
+            const userId:string=req["idFromToken"]
+            return this.groupservice.deleteUser(groupId,userId)
+
+        }
+    
     @Get('user')
     listOwnedGroupsByUser(@Req() req:Request){
         const ownerId:string=req["idFromToken"]

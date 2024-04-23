@@ -83,7 +83,9 @@ export class UserService {
             throw new HttpException(`User not found`,HttpStatus.NOT_FOUND)
         }
         //else delete the user information
-        return await this.userrepository.delete({id:userId})
+
+        return await this.userrepository.remove(user_if_exist)
+        //return await this.userrepository.delete({id:userId})
 
 
     }
