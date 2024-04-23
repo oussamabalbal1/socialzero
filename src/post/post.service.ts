@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreatePostDTO } from './DTO/createPostDTO';
 import { User } from 'src/user/ENTITIES/user.entity';
 import { UUIDDTO } from 'src/user/DTO/IdDTO';
+import { PartialUpdatePostDTO } from './DTO/partialUpdatePostDTO';
 
 @Injectable()
 export class PostService {
@@ -54,13 +55,39 @@ export class PostService {
     }
 
     async deleteOnePostByPostId(params:UUIDDTO):Promise<Post>{
+        //This method is more suitable for scenarios where you want to delete entities based on certain conditions without loading them into memory.
+            //repository.delete(entityId);
+
+
+        //This method is more suitable for scenarios where you need to manipulate or perform additional operations on the entity before deleting it.
+            // entityToRemove = await repository.findOne(entityId);
+            // repository.remove(entityToRemove);
         const postId:string=params.uuid
         //fisrt check the post is exist or not 
         const post:Post=await this.postrepository.findOneBy({id:postId})
         if(!post){
             throw new HttpException(`Post not found. Please provide a valid id.`,HttpStatus.NOT_FOUND)
         }
-        await this.postrepository.delete({id:postId})
+        await this.postrepository.remove(post)
         return post
+    }
+
+    async updatePostById(params:UUIDDTO,partialPost:PartialUpdatePostDTO):Promise<Post>{
+        const postId:string=params.uuid
+        //first we need to find post that match with the ID that provided by client
+        const post:Post= await this.postrepository.findOneBy({id:postId})
+        if(!post){
+            throw new HttpException(`Post not found. Please provide a valid id.`,HttpStatus.NOT_FOUND)
+        }
+        if(partialPost.description==undefined){
+            throw new HttpException(`Nothing to update.`,HttpStatus.NOT_ACCEPTABLE)
+        }
+        //update only provided properties
+        Object.assign(post, partialPost);
+        const updatedAt = new Date()
+        post.updatedAt=updatedAt
+  
+        return this.postrepository.save(post)
+
     }
 }

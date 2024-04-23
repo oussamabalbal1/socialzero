@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, Req } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDTO } from './DTO/createPostDTO';
 import { UserService } from 'src/user/user.service';
 import { UUIDDTO } from 'src/user/DTO/IdDTO';
+import { PartialUpdatePostDTO } from './DTO/partialUpdatePostDTO';
 
 @Controller('post')
 export class PostController {
@@ -36,6 +37,11 @@ export class PostController {
     @Delete(':uuid')
     deleteOnePostByPostId(@Param() params: UUIDDTO){
         return this.postservice.deleteOnePostByPostId(params)
+    }
+    @Patch(':uuid')
+    //using UpdateUserDTO to validate inpute data sent by client
+    updateUserById(@Param() params: UUIDDTO,@Body() partialPost:PartialUpdatePostDTO){
+        return this.postservice.updatePostById(params,partialPost)
     }
 
 }
