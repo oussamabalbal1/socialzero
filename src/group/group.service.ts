@@ -6,6 +6,7 @@ import { CreateGroupDTO } from './DTO/createGroupDTO';
 import { CreatePostDTO } from 'src/post/DTO/createPostDTO';
 import { Location, Post } from 'src/post/ENTITIES/post.entity';
 import { User } from 'src/user/ENTITIES/user.entity';
+import { UUIDDTO } from 'src/user/DTO/IdDTO';
 
 @Injectable()
 export class GroupService {
@@ -14,7 +15,8 @@ export class GroupService {
         @InjectRepository(Post) private readonly postrepository:Repository<Post>,
         @InjectRepository(User) private readonly userrepository:Repository<User>
 ){}
-    async create(group:CreateGroupDTO,ownerId:string):Promise<Group>{
+    //create new group
+    async createOne(group:CreateGroupDTO,ownerId:string):Promise<Group>{
         //find the owner
         const owner:User= await this.userrepository.findOneBy({id:ownerId})
         const createdAt = new Date()
@@ -23,6 +25,29 @@ export class GroupService {
         const group_data = this.grouprepository.create({...group,createdAt,updatedAt,owner:owner,members:[owner],postes:[]})
         return this.grouprepository.save(group_data);
     }
+    //delete an existing group
+    async deleteOne(params:UUIDDTO){
+        const groupId:string=params.uuid
+        //check first if group is exist
+        const group:Group=await this.grouprepository.findOneBy({id:groupId})
+        if(!group){
+            throw new HttpException(`Group you want to delete not found`,HttpStatus.NOT_ACCEPTABLE)
+        }
+        //remove the group
+        return await this.grouprepository.remove(group)
+
+    }
+    //list a group
+    async listOne(params:UUIDDTO):Promise<Group>{
+        const groupId:string=params.uuid
+        //check first if group is exist
+        const group:Group=await this.grouprepository.findOne({where:{id:groupId},relations:{owner:true,postes:true,members:true}})
+        if(!group){
+            throw new HttpException(`Group not found`,HttpStatus.NOT_FOUND)
+        }
+        return group
+    }
+
     async listAllGroups():Promise<Group[]>{
         const groups_data = await this.grouprepository.find({relations:{owner:true,postes:true,members:true}})
         return groups_data

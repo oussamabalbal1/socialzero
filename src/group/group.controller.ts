@@ -16,7 +16,17 @@ export class GroupController {
     @Post()
     createGroup(@Body() group:CreateGroupDTO,@Req() req:Request){
         const userId:string=req["idFromToken"]
-        return this.groupservice.create(group,userId)
+        return this.groupservice.createOne(group,userId)
+    }
+    //delete an existing group using group id
+    @Delete(':uuid')
+    deleteGroup(@Param() params: UUIDDTO){
+        return this.groupservice.deleteOne(params)
+    }
+    //list one group using group id
+    @Get(':uuid')
+    listGroup(@Param() params: UUIDDTO){
+        return this.groupservice.listOne(params)
     }
     @Get()
     listAllGroups(){
