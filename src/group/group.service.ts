@@ -41,7 +41,9 @@ export class GroupService {
     async listOne(params:UUIDDTO):Promise<Group>{
         const groupId:string=params.uuid
         //check first if group is exist
-        const group:Group=await this.grouprepository.findOne({where:{id:groupId},relations:{owner:true,postes:true,members:true}})
+        //relation : relations:{owner:true,postes:true,members:true}
+        //selecting only fullname from owner and id
+        const group:Group=await this.grouprepository.findOne({where:{id:groupId},relations:{owner:true,postes:true,members:true},select:{owner:{fullname:true,id:true}}})
         if(!group){
             throw new HttpException(`Group not found`,HttpStatus.NOT_FOUND)
         }
