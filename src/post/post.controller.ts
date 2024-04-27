@@ -1,28 +1,37 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDTO } from './DTO/createPostDTO';
 import { UserService } from 'src/user/user.service';
 import { UUIDDTO } from 'src/user/DTO/IdDTO';
 import { PartialUpdatePostDTO } from './DTO/partialUpdatePostDTO';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { Location } from './ENTITIES/post.entity';
 
 @Controller('post')
 export class PostController {
 
-    constructor (private readonly postservice:PostService,private readonly userservice:UserService){};
-    //using middleware to extract id from headers by decoding it and pass it back inside req
-    @Post("create")  
-    async createPost(@Body() post:CreatePostDTO,@Req() req:Request){
-        const userId:string=req["idFromToken"]  
-        return this.postservice.createOnePost(userId,post);
+    constructor (private readonly postservice:PostService){};
+
+    //create new post inside user
+    //using authGuard to make sure user is authenticated and extract UUID : req["params_custom"]
+    @UseGuards(AuthGuard)
+    @Post()  
+    async createOnePost(@Body() post:CreatePostDTO,@Req() req:Request){
+        const params:UUIDDTO=req["params_custom"]
+        return this.postservice.createOnePost(params,post,Location.Profile);
     }
 
-
     //get all post
+    @UseGuards(AuthGuard)
     @Get()
     getAllPosts(){
         return this.postservice.listAllPostes()
-        }
+    }
+
+
     //listing one post by post UUID
+    //using authGuard to make sure user is authenticated and extract UUID
+    @UseGuards(AuthGuard)
     @Get(':uuid')
     getPostById(@Param() params: UUIDDTO){
         return this.postservice.listOnePostById(params)
@@ -30,8 +39,8 @@ export class PostController {
 
     @Get('user/posts')
     getPostesByUserId(@Req() req:Request){
-        const id:string=req["idFromToken"] 
-        return this.postservice.listPostsByUserId(id)
+        const params:UUIDDTO=req["params_custom"]
+        return this.postservice.listPostsByUserId(params)
     }
 
     @Delete(':uuid')

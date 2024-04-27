@@ -22,8 +22,9 @@ export class PostExtractTokenToGetIdMiddleware implements NestMiddleware {
       // do not need secrete here to decode the token because you specefied the secret globally inside app module
       //if when we trying to decode token if token was invalid jwt service will throw an error
       const decoded = this.jwtService.verify(token);
-      const idFromToken:string=decoded.id
-      req.idFromToken= idFromToken
+      const params_custom= { uuid:decoded.id }
+      req.params_custom = params_custom
+
   
      
     } catch (error) {

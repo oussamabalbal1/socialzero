@@ -11,7 +11,7 @@ export class AuthController {
 //user sign in - input : User credential output : all User information with Token
 @Get('signin')
 singin(@Body() usersignindata:SigninUserDTO){
-        return this.authervice.authonticate(usersignindata)
+        return this.authervice.authentication(usersignindata)
     }
 @Get('test')
 @UseGuards(AuthGuard)

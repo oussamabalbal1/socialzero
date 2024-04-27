@@ -5,21 +5,21 @@ import { User } from 'src/user/ENTITIES/user.entity';
 import { Repository } from 'typeorm';
 import { sign } from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
-
-     //we need to import user repository into auth module using type orm
-    constructor(@InjectRepository(User) private readonly userrepository:Repository<User>){}
+    constructor (private readonly userservice:UserService){};
+    
 
 
 
 
     //check if email and password are correct if okey generate a Token
-    async authonticate(usersignindata:SigninUserDTO){
+    async authentication(usersignindata:SigninUserDTO){
         //first check if the user exists by his email
         const email:string=usersignindata.email
-        const user_if_exist = await this.userrepository.findOneBy({email})
+        const user_if_exist = await this.userservice.getOneUserByEmail(email)
         if (!user_if_exist) {
             throw new HttpException(`Invalide credentials`,HttpStatus.NOT_FOUND)
         }

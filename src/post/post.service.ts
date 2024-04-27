@@ -6,25 +6,25 @@ import { CreatePostDTO } from './DTO/createPostDTO';
 import { User } from 'src/user/ENTITIES/user.entity';
 import { UUIDDTO } from 'src/user/DTO/IdDTO';
 import { PartialUpdatePostDTO } from './DTO/partialUpdatePostDTO';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class PostService {
-    //note: Post is entity not decorator from @nestjs/common
     constructor(
-        @InjectRepository(Post) private readonly postrepository:Repository<Post>,
-        @InjectRepository(User) private readonly userrepository:Repository<User>
+        private readonly userservice:UserService,
+        @InjectRepository(Post) private readonly postrepository:Repository<Post>
 ){}
     
 
 
     // create one post
-    async createOnePost(userId:string,post:CreatePostDTO):Promise<Post>{
+    async createOnePost(params:UUIDDTO,post:CreatePostDTO,location:Location):Promise<Post>{
         //creating new post associated to userId
-        const user:User=await this.userrepository.findOneBy({id:userId})
+        const user:User=await this.userservice.getOneUser(params)
         const createdAt = new Date()
         const updatedAt = new Date()
         //// to tssociate the post with the user, we should add property user
-        const post_data = this.postrepository.create({...post,createdAt,updatedAt,user:user,source:Location.Profile})
+        const post_data = this.postrepository.create({...post,createdAt,updatedAt,user:user,source:location})
         console.log(post_data)
         return this.postrepository.save(post_data);
     }
@@ -44,8 +44,8 @@ export class PostService {
      
     }
 
-    async listPostsByUserId(id:string){
-        const user:User=await this.userrepository.findOneBy({id:id})
+    async listPostsByUserId(params:UUIDDTO){
+        const user:User=await this.userservice.getOneUser(params)
         try {
             const user_data= await this.postrepository.find({where:{user:user}})
             return user_data;

@@ -11,8 +11,9 @@ import { PostService } from 'src/post/post.service';
   providers: [UserService],
   imports: [
     //adding entities
-    TypeOrmModule.forFeature([User,Post])
+    TypeOrmModule.forFeature([User])
 ],
+exports:[UserService]
 })
 export class UserModule {
     

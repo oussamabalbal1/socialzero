@@ -6,9 +6,13 @@ import { Group } from './ENTITIES/group.entity';
 import { User } from 'src/user/ENTITIES/user.entity';
 import { PostExtractTokenToGetIdMiddleware } from 'src/MIDDLEWARES/post.extract-token-to-get-id.middleware';
 import { Post } from 'src/post/ENTITIES/post.entity';
+import { UserModule } from 'src/user/user.module';
+import { PostModule } from 'src/post/post.module';
 
 @Module({
   imports: [
+    UserModule,
+    PostModule,
     //adding entities
     TypeOrmModule.forFeature([Group,User,Post])
 ],
