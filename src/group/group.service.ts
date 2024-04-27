@@ -8,13 +8,14 @@ import { Location, Post } from 'src/post/ENTITIES/post.entity';
 import { User } from 'src/user/ENTITIES/user.entity';
 import { UUIDDTO } from 'src/user/DTO/IdDTO';
 import { UserService } from 'src/user/user.service';
+import { PostService } from 'src/post/post.service';
 
 @Injectable()
 export class GroupService {
     constructor(
         @InjectRepository(Group) private readonly grouprepository:Repository<Group>,
-        @InjectRepository(Post) private readonly postrepository:Repository<Post>,
-        private readonly userservice:UserService
+        private readonly userservice:UserService,
+        private readonly postservice:PostService
 ){}
 
     //create new group
@@ -27,7 +28,7 @@ export class GroupService {
         const createdAt = new Date()
         const updatedAt = new Date()
         //// to tssociate the post with the user, we should add property user
-        const group_data = this.grouprepository.create({...group,createdAt,updatedAt,owner:owner,members:[owner],postes:[]})
+        const group_data = this.grouprepository.create({...group,createdAt,updatedAt,admin:owner,members:[owner],postes:[]})
         return this.grouprepository.save(group_data);
     }
     //delete an existing group
@@ -48,7 +49,7 @@ export class GroupService {
         //check first if group is exist
         //relation : relations:{owner:true,postes:true,members:true}
         //selecting only fullname from owner and id
-        const group:Group=await this.grouprepository.findOne({where:{id:groupId},relations:{owner:true,postes:true,members:true},select:{owner:{fullname:true,id:true}}})
+        const group:Group=await this.grouprepository.findOne({where:{id:groupId},relations:{admin:true,postes:true,members:true},select:{admin:{fullname:true,id:true}}})
         if(!group){
             throw new HttpException(`Group not found`,HttpStatus.NOT_FOUND)
         }
@@ -56,7 +57,7 @@ export class GroupService {
     }
 
     async listAllGroups():Promise<Group[]>{
-        const groups_data = await this.grouprepository.find({relations:{owner:true,postes:true,members:true}})
+        const groups_data = await this.grouprepository.find({relations:{admin:true,postes:true,members:true}})
         return groups_data
     }
     async listOwnedGroupsByUser(userParamsUUID:UUIDDTO):Promise<Group[]>{
@@ -64,24 +65,25 @@ export class GroupService {
         const user:User= await this.userservice.getOneUser(userParamsUUID)
         //find list of groups that match user
         const groups_data = await this.grouprepository.find({
-            where:{owner:user},
-            relations:{owner:true,members:true,postes:true}
+            where:{admin:user},
+            relations:{admin:true,members:true,postes:true}
             })
         return groups_data
     }
 
-    async createPost(userParamsUUID:UUIDDTO,groupId:string,post:CreatePostDTO){
-        const createdAt = new Date()
-        const updatedAt = new Date()
-        //find the user
-        const user:User=await this.userservice.getOneUser(userParamsUUID)
+
+    //create a post inside a group 
+    async createPost(userParamsUUID:UUIDDTO,groupParamsUUID:UUIDDTO,post:CreatePostDTO){
         //find the group
-        const group:Group=await this.grouprepository.findOneBy({id:groupId})
-        
-        const post_data = await this.postrepository.create({...post,createdAt,updatedAt,user:user,group:group,source:Location.Group})
-        return this.postrepository.save(post_data);
+        const group:Group=await this.listOne(groupParamsUUID)
+        const post_data:Post=await this.postservice.createOnePost(userParamsUUID,post,Location.Group)
+        console.log(group)
+        group.postes.push(post_data)
+        return this.grouprepository.save(group);
     }
-    async addUser(userParamsUUID:UUIDDTO,groupId:string){
+
+    async addUser(userParamsUUID:UUIDDTO,groupParamsUUID:UUIDDTO){
+        const groupId:string=groupParamsUUID.uuid
         //find group
         const group:Group= await this.grouprepository.findOne({relations:{members:true},where:{id:groupId}})
         //find user
@@ -121,3 +123,4 @@ export class GroupService {
 
     }
 }
+

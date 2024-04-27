@@ -29,8 +29,8 @@ export class Group {
 //   user: User;
 
   //a group can owned by one user only
-  @ManyToOne(()=>User,(user)=>user.groups)
-  owner: User;
+  @ManyToOne(()=>User,(user)=>user.adminIn)
+  admin: User;
 
   //group can have many posts
   @OneToMany(()=>Post,(post)=>post.group)

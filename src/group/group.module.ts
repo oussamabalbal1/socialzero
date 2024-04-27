@@ -14,19 +14,13 @@ import { PostModule } from 'src/post/post.module';
     UserModule,
     PostModule,
     //adding entities
-    TypeOrmModule.forFeature([Group,User,Post])
+    TypeOrmModule.forFeature([Group])
 ],
   controllers: [GroupController],
   providers: [GroupService]
 })
 
 //applying middleware for all routes inside GroupContoller
-export class GroupModule implements NestModule{
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(PostExtractTokenToGetIdMiddleware).forRoutes(
-      GroupController
-      // { path: 'post', method: RequestMethod.GET }
-    )
-  }
+export class GroupModule {}
 
-}
+

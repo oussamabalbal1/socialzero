@@ -14,22 +14,25 @@ export class GroupController {
 
     //create a group and be owner of it 
     //user should be authenticated - I am using middleware to extract user ID from token
+    @UseGuards(AuthGuard)
     @Post()
-    createGroup(@Body() group:CreateGroupDTO,@Req() req:Request){
+    createGroup(@Body() groupParamsUUID:CreateGroupDTO,@Req() req:Request){
         const userParamsUUID:UUIDDTO=req["params_custom"]
-        const userId:string=req["idFromToken"]
-        return this.groupservice.createOne(group,userParamsUUID)
+        return this.groupservice.createOne(groupParamsUUID,userParamsUUID)
     }
     //delete an existing group using group id
+    @UseGuards(AuthGuard)
     @Delete(':uuid')
-    deleteGroup(@Param() params: UUIDDTO){
-        return this.groupservice.deleteOne(params)
+    deleteGroup(@Param() groupParamsUUID: UUIDDTO){
+        return this.groupservice.deleteOne(groupParamsUUID)
     }
     //list one group using group id
+    @UseGuards(AuthGuard)
     @Get(':uuid')
-    listGroup(@Param() params: UUIDDTO){
-        return this.groupservice.listOne(params)
+    listGroup(@Param() groupParamsUUID: UUIDDTO){
+        return this.groupservice.listOne(groupParamsUUID)
     }
+    @UseGuards(AuthGuard)
     @Get()
     listAllGroups(){
         const groups= this.groupservice.listAllGroups()
@@ -38,19 +41,19 @@ export class GroupController {
 
     @UseGuards(AuthGuard)
     @Post(':uuid/post')
-    createPost(@Body() post:CreatePostDTO,@Param() params: UUIDDTO,@Req() req:Request){
+    createPost(@Body() post:CreatePostDTO,@Param() groupParamsUUID: UUIDDTO,@Req() req:Request){
         const userParamsUUID:UUIDDTO=req["params_custom"]
-        const groupId:string=params.uuid;
-        return this.groupservice.createPost(userParamsUUID,groupId,post)
+        return this.groupservice.createPost(userParamsUUID,groupParamsUUID,post)
     }
     //this route will add new user to the group(should provide group id in the link )
+    @UseGuards(AuthGuard)
     @Post(':uuid/user')
-    addUser(@Param() params: UUIDDTO,@Req() req:Request){
-        const groupId:string=params.uuid;
+    addUser(@Param() groupParamsUUID: UUIDDTO,@Req() req:Request){
         const userParamsUUID:UUIDDTO=req["params_custom"]
-        return this.groupservice.addUser(userParamsUUID,groupId)
+        return this.groupservice.addUser(userParamsUUID,groupParamsUUID)
     }
     //this function will delete an existing user into the group (should provide group id the link)
+    @UseGuards(AuthGuard)
     @Delete(':uuid/user')
         deleteUser(@Param() params:UUIDDTO,@Req() req:Request ){
             const groupId:string=params.uuid;
@@ -58,7 +61,7 @@ export class GroupController {
             return this.groupservice.deleteUser(groupId,userParamsUUID.uuid)
 
         }
-    
+    @UseGuards(AuthGuard)
     @Get('user')
     listOwnedGroupsByUser(@Req() req:Request){
         const userParamsUUID:UUIDDTO=req["params_custom"]

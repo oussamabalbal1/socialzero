@@ -1,3 +1,4 @@
+import { Role } from 'src/auth/DECORATORS/role/interface';
 import { Group } from 'src/group/ENTITIES/group.entity';
 import { Post } from 'src/post/ENTITIES/post.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
@@ -17,6 +18,9 @@ export class User {
 
   @Column()
   password: string;
+
+  @Column({ default:Role.User}) // Specify your default value here
+  role: Role;
   
   @Column()
   createdAt: Date;
@@ -32,8 +36,8 @@ export class User {
     @OneToMany(() => Post, (post) => post.user,{cascade:true})
     postes: Post[];
     //user can own many groups
-    @OneToMany(() => Group, (group) => group.owner,{cascade:true})
-    groups: Group[];
+    @OneToMany(() => Group, (group) => group.admin,{cascade:true})
+    adminIn: Group[];
     //each one user can joined to many groups
     @ManyToMany(() => Group, (group) => group.members,{cascade:true})
     memberIn:Group[]

@@ -7,33 +7,68 @@ import { UUIDDTO } from './DTO/IdDTO';
 import { PartialUpdateUserDTO } from './DTO/partialUpdateUserDTO';
 import { Roles } from 'src/auth/DECORATORS/role/role.decorator';
 import { Role } from 'src/auth/DECORATORS/role/interface';
+import { AuthRoleGuard } from 'src/auth/auth.role.guard';
 
 @Controller('user')
 export class UserController {
     constructor (private readonly userservice:UserService){};
 
-
+    //create a new user
     @Post()
     createOneUser(@Body() user:CreateUserDTO){
         return this.userservice.createOneUser(user)
     }
 
+    
+    //ANY USER CAN GET/PATCH/DELETE HIS INFORMATION
+    //NA= NOT AN ADMIN
     @UseGuards(AuthGuard)
-    @Get(':uuid')
-    getOneUser(@Param() params: UUIDDTO,@Req() req:Request){
-        console.log(req["params_custom"])
-        return this.userservice.getOneUser(params)
+    @Get()
+    getOneUserNA(@Req() req:Request){
+        const userParamsUUID:UUIDDTO=req["params_custom"]
+        return this.userservice.getOneUser(userParamsUUID)
     }
 
     @UseGuards(AuthGuard)
-    @Patch(':uuid')
-    updateUserById(@Param() params: UUIDDTO,@Body() partialUser:PartialUpdateUserDTO){
-        return this.userservice.updateUserById(params,partialUser)
+    @Patch()
+    updateUserByIdNA(@Body() partialUser:PartialUpdateUserDTO,@Req() req:Request){
+        const userParamsUUID:UUIDDTO=req["params_custom"]
+        return this.userservice.updateUserById(userParamsUUID,partialUser)
     }
 
-    //user should be authenticated
     @UseGuards(AuthGuard)
-    @Get()  
+    @Delete()
+    deleteUserByIdNA(@Req() req:Request){
+        const userParamsUUID:UUIDDTO=req["params_custom"]
+        return this.userservice.deleteUserById(userParamsUUID)
+    }
+
+
+
+
+    //ONLY ADMIN CAN ACCESS TO THIS ROUTES
+    //ONLY ADMIN CAN GET/PATCH/DELETE ANY USER JUST BY ID
+    @UseGuards(AuthRoleGuard)
+    @Roles(Role.Admin)
+    @Get('admin/:uuid')
+    getOneUser(@Param() userParamsUUID: UUIDDTO){
+        return this.userservice.getOneUser(userParamsUUID)
+    }
+    @UseGuards(AuthRoleGuard)
+    @Roles(Role.Admin)
+    @Patch('admin/:uuid')
+    updateUserById(@Param() userParamsUUID: UUIDDTO,@Body() partialUser:PartialUpdateUserDTO){
+        return this.userservice.updateUserById(userParamsUUID,partialUser)
+    }
+    @UseGuards(AuthRoleGuard)
+    @Roles(Role.Admin)
+    @Delete('admin/:uuid')
+    deleteUserById(@Param() userParamsUUID: UUIDDTO){
+        return this.userservice.deleteUserById(userParamsUUID)
+    }
+    @UseGuards(AuthRoleGuard)
+    @Roles(Role.Admin)
+    @Get('admin/')  
     getAllUsers(){
         return this.userservice.getAllUsers();
     }
@@ -44,10 +79,6 @@ export class UserController {
 
 
 
-    @UseGuards(AuthGuard)
-    @Delete(':uuid')
-    deleteUserById(@Param() params: UUIDDTO){
-        return this.userservice.deleteUserById(params)
-    }
+
 
 }

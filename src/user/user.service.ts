@@ -36,7 +36,7 @@ export class UserService {
     async getOneUser(params:UUIDDTO): Promise<User>{
         //params = { uuid: 'f6e4b01d-745a-4cda-8d32-1385a255fe1e' }
         const userId:string=params.uuid
-        const user_data= await this.userrepository.findOne({where:{id:userId},relations:{postes:true,groups:true,memberIn:true}})
+        const user_data= await this.userrepository.findOne({where:{id:userId},relations:{postes:true,adminIn:true,memberIn:true}})
         if(!user_data){
             throw new HttpException(`User not found.`,HttpStatus.NOT_FOUND)
         }
@@ -46,18 +46,17 @@ export class UserService {
 
     //use this method on AuthService
     async getOneUserByEmail(email:string): Promise<User>{
-        const user_data= await this.userrepository.findOne({where:{email},relations:{postes:false,groups:false,memberIn:false}})
+        const user_data= await this.userrepository.findOne({where:{email},relations:{postes:false,adminIn:false,memberIn:false}})
         if(!user_data){
             throw new HttpException(`User not found.`,HttpStatus.NOT_FOUND)
         }
         return user_data;
     }
 
-    //Get all users - input:nothing output:Array of Users
+
     async getAllUsers():Promise<User[]>{
         return await this.userrepository.find(
-            //use relations so will return another -postes- property with user object
-            {relations:{postes:true,groups:true,memberIn:true}
+            {relations:{postes:false,adminIn:false,memberIn:false}
         });
     }
 
@@ -82,19 +81,10 @@ export class UserService {
         return this.userrepository.save(user)
     }
     
-    async deleteUserById(params:UUIDDTO){
-        const userId:string=params.uuid
-        //first check if the id provided by client match any user
-        const user_if_exist= await this.userrepository.findOneBy({id:userId})
-        //if not exist thrwo an exception
-        if(!user_if_exist){
-            throw new HttpException(`User not found`,HttpStatus.NOT_FOUND)
-        }
-        //else delete the user information
-
-        return await this.userrepository.remove(user_if_exist)
+    async deleteUserById(userParamsUUID:UUIDDTO){
+        const user:User=await this.getOneUser(userParamsUUID)
+        return await this.userrepository.remove(user)
         //return await this.userrepository.delete({id:userId})
-
 
     }
 
