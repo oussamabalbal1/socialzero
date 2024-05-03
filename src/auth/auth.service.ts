@@ -34,8 +34,8 @@ export class AuthService {
         //next time when i need to decode the token i need the "secrete", token contain user information
         //i need that information inside the tocken to check if user is authonticated
         const data:any={
-            "email":user_if_exist.email,
             "id":user_if_exist.id,
+            'role':user_if_exist.role
         }
         const token=sign(data,"secrete")
         // const { password, ...result } = user;

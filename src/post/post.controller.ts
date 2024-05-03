@@ -15,8 +15,7 @@ export class PostController {
 
     constructor (private readonly postservice:PostService){};
 
-    //create new post inside user
-    //using authGuard to make sure user is authenticated and extract UUID : req["params_custom"]
+
     @UseGuards(AuthGuard)
     @Post()
     async createOnePost(@Body() post:CreatePostDTO,@Req() req:Request){
@@ -26,8 +25,8 @@ export class PostController {
 
 
     //ONLY ADMIN CAN DO THIS
+    @UseGuards(AuthGuard,AuthRoleGuard)
     @Roles(Role.Admin)
-    @UseGuards(AuthRoleGuard)
     @Get()
     getAllPosts(){
         return this.postservice.listAllPostes()
@@ -39,8 +38,10 @@ export class PostController {
     //
     @UseGuards(AuthGuard)
     @Get(':uuid')
-    getPostById(@Param() params: UUIDDTO){
-        return this.postservice.listOnePostById(params)
+    getPostById(@Param() postParamsUUID: UUIDDTO,@Req() req:Request){
+        const userid:UUIDDTO=req["params_custom"]
+        const userRole=req["params_role"]
+        return this.postservice.listOnePostById(postParamsUUID,userid,userRole.role)
     }
 
     @Get('user/posts')
@@ -49,14 +50,23 @@ export class PostController {
         return this.postservice.listPostsByUserId(params)
     }
 
+    //normal user can delete his posts only
+    //admin can delete any post
+    @UseGuards(AuthGuard)
     @Delete(':uuid')
-    deleteOnePostByPostId(@Param() params: UUIDDTO){
-        return this.postservice.deleteOnePostByPostId(params)
+    deleteOnePostByPostId(@Param() postParamsUUID: UUIDDTO,@Req() req:Request){
+        const userParamsUUID:UUIDDTO=req["params_custom"]
+        const userRole:Role=req["params_role"].role
+        return this.postservice.deleteOnePostByPostId(postParamsUUID,userParamsUUID,userRole)
     }
+
+
     @Patch(':uuid')
     //using UpdateUserDTO to validate inpute data sent by client
-    updateUserById(@Param() params: UUIDDTO,@Body() partialPost:PartialUpdatePostDTO){
-        return this.postservice.updatePostById(params,partialPost)
+    updateUserById(@Param() postParamsUUID: UUIDDTO,@Body() partialPost:PartialUpdatePostDTO,@Req() req:Request){
+        const userParamsUUID:UUIDDTO=req["params_custom"]
+        const userRole:Role=req["params_role"].role
+        return this.postservice.updatePostById(postParamsUUID,partialPost,userParamsUUID,userRole)
     }
 
 }

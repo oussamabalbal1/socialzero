@@ -22,42 +22,17 @@ export class AuthRoleGuard implements CanActivate {
     console.log("inside auth role guard")
 
     const request = context.switchToHttp().getRequest();
-    //extract token and check it 
-    const token = this.extractTokenFromHeader(request);
-    if (!token) {
-      throw new HttpException(`Access token is missing. Please provide an access token.`,HttpStatus.UNAUTHORIZED)
-    }
+
+    //this role set based on user token
+    const currentUserRole=request["params_role"]
+  
+  
     //retrive the data sent by Role decorator
     const role=this.reflector.get(Roles,context.getHandler())
-  
-    console.log(`should be ${role}`)
-
-
-    try {
-      // do not need secrete here to decode the token because you specefied the secret globally inside app module
-      // if Token is invalid, JWT will throw an error
-      const decoded = await this.jwtService.verify(token); 
-      const params_custom= { uuid:decoded.id }
-      console.log(params_custom)
-      const user:User=await this.userservice.getOneUser(params_custom)
-      if(!(user.role==role)){
-        console.log("This user is not an admin..")
-        throw new HttpException('User is not an admin',HttpStatus.UNAUTHORIZED)
-      }
-      request["params_custom"] = params_custom
-      return true;
-    } catch (error) {
-      // handle JWT verification errors
-      throw new HttpException(`Invalid token. Please provide a valid access token.`,HttpStatus.UNAUTHORIZED)
+    if(!(currentUserRole.role==role)){
+      throw new HttpException('UNAUTHORIZED',HttpStatus.UNAUTHORIZED)
     }
+    return true;
   }
 
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const authorizationHeader = request.headers['authorization'];
-    if (typeof authorizationHeader === 'string') {
-      const [type, token] = authorizationHeader.split(' ');
-      return type === 'Bearer' ? token : undefined;
-    }
-    return undefined;
-  }
 }

@@ -38,6 +38,7 @@ export class UserService {
         //if a client provided a value for userRelations use it, if not use : {postes:true,adminIn:true,memberIn:true}
         //params = { uuid: 'f6e4b01d-745a-4cda-8d32-1385a255fe1e' }
         const userId:string=params.uuid
+        console.log(userId)
         const user_data= await this.userrepository.findOne({where:{id:userId},relations:userRelations?userRelations:{postes:true,adminIn:true,memberIn:true}})
         if(!user_data){
             throw new HttpException(`User not found.`,HttpStatus.NOT_FOUND)

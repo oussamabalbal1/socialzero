@@ -64,10 +64,12 @@ export class UserController {
     deleteUserById(@Param() userParamsUUID: UUIDDTO){
         return this.userservice.deleteUserById(userParamsUUID)
     }
-    @UseGuards(AuthRoleGuard)
+
+    @UseGuards(AuthGuard,AuthRoleGuard)
     @Roles(Role.Admin)
     @Get('admin/')  
     getAllUsers(){
+        console.log('inside user/admin route')
         return this.userservice.getAllUsers();
     }
 

@@ -27,9 +27,12 @@ export class AuthGuard implements CanActivate {
       // if Token is invalid, JWT will throw an error
       const decoded = await this.jwtService.verify(token); 
       const params_custom= { uuid:decoded.id }
+      const params_role={role:decoded.role}
       //i found on nest docs that can assigning data to the request object
       //so that we can access to the data in any route handler using this guard
       request["params_custom"] = params_custom
+      request["params_role"] = params_role
+      
       console.log("End authentication guard..")
       return true;
     } catch (error) {
