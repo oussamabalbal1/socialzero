@@ -18,8 +18,6 @@ export class UserController {
     createOneUser(@Body() user:CreateUserDTO){
         return this.userservice.createOneUser(user)
     }
-
-    
     //ANY USER CAN GET/PATCH/DELETE HIS INFORMATION
     //NA= NOT AN ADMIN
     @UseGuards(AuthGuard)

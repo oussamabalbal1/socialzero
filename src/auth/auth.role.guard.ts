@@ -30,13 +30,15 @@ export class AuthRoleGuard implements CanActivate {
     //retrive the data sent by Role decorator
     const role=this.reflector.get(Roles,context.getHandler())
   
-    console.log(role)
+    console.log(`should be ${role}`)
+
 
     try {
       // do not need secrete here to decode the token because you specefied the secret globally inside app module
       // if Token is invalid, JWT will throw an error
       const decoded = await this.jwtService.verify(token); 
       const params_custom= { uuid:decoded.id }
+      console.log(params_custom)
       const user:User=await this.userservice.getOneUser(params_custom)
       if(!(user.role==role)){
         console.log("This user is not an admin..")

@@ -3,8 +3,6 @@ import { GroupService } from './group.service';
 import { CreateGroupDTO } from './DTO/createGroupDTO';
 import { UUIDDTO } from 'src/user/DTO/IdDTO';
 import { CreatePostDTO } from 'src/post/DTO/createPostDTO';
-import { constants } from 'buffer';
-import { stringify } from 'querystring';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('group')

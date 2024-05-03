@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Query, UseGuards } from '@nestjs/common';
 import { CreateUserDTO } from './DTO/createUserDTO';
 import { User } from './ENTITIES/user.entity';
-import { Between, Repository } from 'typeorm';
+import { Between, FindOptionsRelations, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { UUIDDTO } from './DTO/IdDTO';
@@ -33,10 +33,12 @@ export class UserService {
 
 
     //get one user by id
-    async getOneUser(params:UUIDDTO): Promise<User>{
+    async getOneUser(params:UUIDDTO,userRelations?:FindOptionsRelations<User>): Promise<User>{
+        //userRelations is optional
+        //if a client provided a value for userRelations use it, if not use : {postes:true,adminIn:true,memberIn:true}
         //params = { uuid: 'f6e4b01d-745a-4cda-8d32-1385a255fe1e' }
         const userId:string=params.uuid
-        const user_data= await this.userrepository.findOne({where:{id:userId},relations:{postes:true,adminIn:true,memberIn:true}})
+        const user_data= await this.userrepository.findOne({where:{id:userId},relations:userRelations?userRelations:{postes:true,adminIn:true,memberIn:true}})
         if(!user_data){
             throw new HttpException(`User not found.`,HttpStatus.NOT_FOUND)
         }

@@ -20,7 +20,7 @@ export class PostService {
     // create one post
     async createOnePost(params:UUIDDTO,post:CreatePostDTO,location:Location):Promise<Post>{
         //creating new post associated to userId
-        const user:User=await this.userservice.getOneUser(params)
+        const user:User=await this.userservice.getOneUser(params,{postes:false,adminIn:true,memberIn:true})
         const createdAt = new Date()
         const updatedAt = new Date()
         //// to tssociate the post with the user, we should add property user
@@ -28,9 +28,10 @@ export class PostService {
         console.log(post_data)
         return this.postrepository.save(post_data);
     }
+
     //list all postes
     async listAllPostes(){
-        return await this.postrepository.find({relations:{user:true,group:true}})
+        return await this.postrepository.find({relations:{user:true,group:true},select:{user:{fullname:true,id:true}}})
     }
 
 
