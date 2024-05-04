@@ -9,6 +9,7 @@ import { User } from 'src/user/ENTITIES/user.entity';
 import { UUIDDTO } from 'src/user/DTO/IdDTO';
 import { UserService } from 'src/user/user.service';
 import { PostService } from 'src/post/post.service';
+import { Role } from 'src/auth/DECORATORS/role/interface';
 
 @Injectable()
 export class GroupService {
@@ -32,23 +33,32 @@ export class GroupService {
         return this.grouprepository.save(group_data);
     }
     //delete an existing group
-    async deleteOne(params:UUIDDTO){
-        const groupId:string=params.uuid
-        //check first if group is exist
-        const group:Group=await this.grouprepository.findOneBy({id:groupId})
-        if(!group){
-            throw new HttpException(`Group you want to delete not found`,HttpStatus.NOT_ACCEPTABLE)
+    async deleteOne(groupParamsUUID:UUIDDTO,userParamsUUID:UUIDDTO,userRole:Role){
+        const groupId:string=groupParamsUUID.uuid
+        const userId:string=userParamsUUID.uuid
+        //this case: role user but admin of the group can delete the group
+        if(userRole=='user'){
+            const group:Group=await this.grouprepository.findOne({where:{id:groupId,admin:{id:userId}}})
+            if(!group){
+                throw new HttpException('Group do not found or you do not have permission to delete this group',HttpStatus.UNAUTHORIZED)
+            }
+            return await this.grouprepository.remove(group)
         }
-        //remove the group
-        return await this.grouprepository.remove(group)
+        //this case: role admin can delete the group 
+        if(userRole=='admin'){
+            const group:Group=await this.grouprepository.findOneBy({id:groupId})
+            if(!group){
+                throw new HttpException(`Group not found`,HttpStatus.NOT_ACCEPTABLE)
+            }
+            //remove the group
+            return await this.grouprepository.remove(group)
+        }
+
 
     }
     //list a group
-    async listOne(params:UUIDDTO):Promise<Group>{
-        const groupId:string=params.uuid
-        //check first if group is exist
-        //relation : relations:{owner:true,postes:true,members:true}
-        //selecting only fullname from owner and id
+    async listOne(groupParamsUUID:UUIDDTO):Promise<Group>{
+        const groupId:string=groupParamsUUID.uuid
         const group:Group=await this.grouprepository.findOne({where:{id:groupId},relations:{admin:true,postes:true,members:true},select:{admin:{fullname:true,id:true}}})
         if(!group){
             throw new HttpException(`Group not found`,HttpStatus.NOT_FOUND)
@@ -57,7 +67,7 @@ export class GroupService {
     }
 
     async listAllGroups():Promise<Group[]>{
-        const groups_data = await this.grouprepository.find({relations:{admin:true,postes:true,members:true}})
+        const groups_data = await this.grouprepository.find({relations:{admin:true,postes:true,members:true},select:{admin:{email:true,fullname:true},members:{fullname:true,email:true}}})
         return groups_data
     }
     async listOwnedGroupsByUser(userParamsUUID:UUIDDTO):Promise<Group[]>{
@@ -86,12 +96,15 @@ export class GroupService {
         const groupId:string=groupParamsUUID.uuid
         //find group
         const group:Group= await this.grouprepository.findOne({relations:{members:true},where:{id:groupId}})
+        if(!group){
+            throw new HttpException(`Group not found.`,HttpStatus.NOT_FOUND)
+        }
         //find user
         const user:User = await this.userservice.getOneUser(userParamsUUID)
         //before adding a user to a group we should verify there is no user with the same id
         const isThere = group.members.find((user) => user.id == userParamsUUID.uuid);
         if(isThere){
-            throw new HttpException(`User Already Exist`,HttpStatus.NOT_ACCEPTABLE)
+            throw new HttpException(`User is a mumber of this group.`,HttpStatus.NOT_ACCEPTABLE)
         }
         //add user to group
         group.members.push(user)
@@ -100,26 +113,30 @@ export class GroupService {
 
 
     }
-
-    async deleteUser(groupId:string,userId:string):Promise<Group>{
+    //not implemented yet ..
+    //it removing evry thing not only one user
+    //the problem is in findone function it return only the member that match the search option 
+    async deleteUser(groupParamsUUID:UUIDDTO,userParamsUUID:UUIDDTO):Promise<Group>{
         //find group
         //this will return the entire group information
-        const group:Group= await this.grouprepository.findOne({relations:{members:true},where:{id:groupId}})
 
-        //this will return group with one member that match the userId
-        //i would like to use this to  check the user that i want to delete it exist in the group or not 
-        //if count is greater than 0 (entity found)
-        
-        //before deleting a user from a group we should verify is that user is a member of this group
-        const ifMemberFoundInTheGroup= await this.grouprepository.count({relations:{members:true},where:{members:{id:userId}}})
-        if (ifMemberFoundInTheGroup==0){
-            throw new HttpException(`User is not a member of the group`,HttpStatus.NOT_ACCEPTABLE)
+        console.log('run this route..')
+        const groupId:string=groupParamsUUID.uuid
+        const userId:string=userParamsUUID.uuid
+        const group= await this.grouprepository.findOne({where:{id:groupId,members:{id:userId}},relations:{members:true}})
+        if(!group){
+            throw new HttpException('Group not found or user is not a member of this group.',HttpStatus.NOT_FOUND)
         }
-
         //deletin user
-        group.members=group.members.filter((user) => user.id !== userId);
-        
-        return await this.grouprepository.save(group)
+        console.log(group.id)
+        // group.members=group.members.filter(
+        //     (user) => {return user.id != userParamsUUID.uuid}
+        // );
+
+        // console.log(group.members)
+
+        return 
+        // return await this.grouprepository.save(group)
 
     }
 }

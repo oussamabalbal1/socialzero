@@ -4,6 +4,9 @@ import { CreateGroupDTO } from './DTO/createGroupDTO';
 import { UUIDDTO } from 'src/user/DTO/IdDTO';
 import { CreatePostDTO } from 'src/post/DTO/createPostDTO';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthRoleGuard } from 'src/auth/auth.role.guard';
+import { Role } from 'src/auth/DECORATORS/role/interface';
+import { Roles } from 'src/auth/DECORATORS/role/role.decorator';
 
 @Controller('group')
 export class GroupController {
@@ -11,7 +14,7 @@ export class GroupController {
 
 
     //create a group and be owner of it 
-    //user should be authenticated - I am using middleware to extract user ID from token
+    //tested..
     @UseGuards(AuthGuard)
     @Post()
     createGroup(@Body() groupParamsUUID:CreateGroupDTO,@Req() req:Request){
@@ -19,11 +22,16 @@ export class GroupController {
         return this.groupservice.createOne(groupParamsUUID,userParamsUUID)
     }
     //delete an existing group using group id
+    //only user that own that group can delete that gourp 
+    //only admin can delete any group
     @UseGuards(AuthGuard)
     @Delete(':uuid')
-    deleteGroup(@Param() groupParamsUUID: UUIDDTO){
-        return this.groupservice.deleteOne(groupParamsUUID)
+    deleteGroup(@Param() groupParamsUUID: UUIDDTO,@Req() req:Request){
+        const userParamsUUID:UUIDDTO=req["params_custom"]
+        const userRole=req["params_role"].role
+        return this.groupservice.deleteOne(groupParamsUUID,userParamsUUID,userRole)
     }
+
     //list one group using group id
     @UseGuards(AuthGuard)
     @Get(':uuid')
@@ -53,10 +61,9 @@ export class GroupController {
     //this function will delete an existing user into the group (should provide group id the link)
     @UseGuards(AuthGuard)
     @Delete(':uuid/user')
-        deleteUser(@Param() params:UUIDDTO,@Req() req:Request ){
-            const groupId:string=params.uuid;
+        deleteUser(@Param() groupParamsUUID:UUIDDTO,@Req() req:Request ){
             const userParamsUUID:UUIDDTO=req["params_custom"]
-            return this.groupservice.deleteUser(groupId,userParamsUUID.uuid)
+            return this.groupservice.deleteUser(groupParamsUUID,userParamsUUID)
 
         }
     @UseGuards(AuthGuard)

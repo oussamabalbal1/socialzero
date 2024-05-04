@@ -61,6 +61,8 @@ export class PostController {
     }
 
 
+    //normal user can update his posts only
+    //admin can update any post based on post id 
     @Patch(':uuid')
     //using UpdateUserDTO to validate inpute data sent by client
     updateUserById(@Param() postParamsUUID: UUIDDTO,@Body() partialPost:PartialUpdatePostDTO,@Req() req:Request){
